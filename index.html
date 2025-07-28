@@ -201,20 +201,33 @@
             margin-top: 2rem;
         }
 
-        .service-card {
-            background-color: #1a1a1a;
-            padding: 1.5rem;
-            border-radius: 5px;
-            text-align: center;
-        }
+       .service-card {
+    background-color: #1a1a1a;
+    padding: 1.5rem;
+    border-radius: 5px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
 
-        .service-card img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 5px;
-            margin-bottom: 1rem;
-        }
+.service-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.service-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 5px;
+    margin-bottom: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.service-card:hover img {
+    transform: scale(1.05);
+}
+
 
         /* Gallery section */
         .gallery-grid {
@@ -433,7 +446,7 @@
 
     <!-- Footer -->
     <footer>
-        <p>&copy; 2025 The Vibe Garden. All rights reserved.</p>
+        <p>&copy; 2025 The Vibe Garden. All rights reserved. Designed By Rashid Seidu (0547642937)</p>
     </footer>
 
     <!-- Internal JavaScript for offline functionality -->
