@@ -1,0 +1,476 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Vibe Garden - Luxury Event Space & Accommodations</title>
+    <!-- Internal CSS for offline functionality -->
+    <style>
+        /* Reset default styles for consistency */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body styles: black background, white text */
+        body {
+            font-family: 'Georgia', serif;
+            background-color: #000000;
+            color: #ffffff;
+            line-height: 1.6;
+        }
+
+        /* Navigation bar */
+        nav {
+            background-color: #000000;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        nav ul {
+            list-style: none;
+        }
+
+        nav ul li {
+            display: inline-block;
+            margin: 0 1rem;
+        }
+
+        nav ul li a {
+            color: #ffffff;
+            text-decoration: none;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.1rem;
+            transition: color 0.3s;
+        }
+
+        nav ul li a:hover {
+            color: #b22222; /* Red accent on hover */
+        }
+
+        /* Hero section with slider */
+        .hero {
+            height: 80vh;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .slider {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .slide {
+            min-width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            background: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay for readability */
+            padding: 2rem;
+            border-radius: 10px;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .cta-button {
+            background-color: #b22222;
+            color: #ffffff;
+            padding: 0.8rem 1.5rem;
+            text-decoration: none;
+            font-family: 'Montserrat', sans-serif;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            margin: 0 0.5rem;
+        }
+
+        .cta-button:hover {
+            background-color: #ff0000;
+        }
+
+        /* Slider controls */
+        .slider-controls {
+            position: absolute;
+            bottom: 20px;
+            z-index: 2;
+            text-align: center;
+            width: 100%;
+        }
+
+        .slider-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background-color: #ffffff;
+            border-radius: 50%;
+            margin: 0 5px;
+            cursor: pointer;
+            opacity: 0.5;
+            transition: opacity 0.3s;
+        }
+
+        .slider-dot.active {
+            opacity: 1;
+        }
+
+        /* Section styles */
+        section {
+            padding: 4rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        section h2 {
+            font-size: 2.5rem;
+            color: #b22222;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        /* Services section */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .service-card {
+            background-color: #1a1a1a;
+            padding: 1.5rem;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .service-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+
+        /* Gallery section */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border: 2px solid #ffffff;
+            border-radius: 5px;
+        }
+
+        .gallery-item p {
+            color: #b22222;
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+
+        /* Contact section */
+        .contact-info {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .contact-info p {
+            margin: 0.5rem 0;
+        }
+
+        .whatsapp-button {
+            background-color: #25D366;
+            color: #ffffff;
+            padding: 0.8rem 1.5rem;
+            text-decoration: none;
+            font-family: 'Montserrat', sans-serif;
+            border-radius: 5px;
+            display: inline-block;
+            margin: 1rem 0;
+            transition: background-color 0.3s;
+        }
+
+        .whatsapp-button:hover {
+            background-color: #20b354;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #1a1a1a;
+            text-align: center;
+            padding: 1rem;
+            margin-top: 2rem;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            nav ul li {
+                display: block;
+                margin: 0.5rem 0;
+            }
+
+            section {
+                padding: 2rem 1rem;
+            }
+
+            .cta-button {
+                display: block;
+                margin: 0.5rem auto;
+                width: fit-content;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar with External Page Links -->
+    <nav>
+        <ul>
+            <li><a href="home.html">Home</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="services.html">Services</a></li>
+            <li><a href="gallery.html">Gallery</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+    </nav>
+
+    <!-- Homepage: Hero Section with Slider -->
+    <section id="home" class="hero">
+        <div class="slider">
+            <!-- 10 slides for the hero section -->
+            <div class="slide" style="background-image: url('slider1-placeholder.jpg');"></div>
+            <div class="slide" style="background-image: url('slider2-placeholder.jpg');"></div>
+            <div class="slide" style="background-image: url('slider3-placeholder.jpg');"></div>
+            <div class="slide" style="background-image: url('slider4-placeholder.jpg');"></div>
+            <div class="slide" style="background-image: url('slider5-placeholder.jpg');"></div>
+            <div class="slide" style="background-image: url('slider6-placeholder.jpg');"></div>
+            <div class="slide" style="background-image: url('slider7-placeholder.jpg');"></div>
+            <div class="slide" style="background-image: url('slider8-placeholder.jpg');"></div>
+            <div class="slide" style="background-image: url('slider9-placeholder.jpg');"></div>
+            <div class="slide" style="background-image: url('slider10-placeholder.jpg');"></div>
+        </div>
+        <div class="hero-content">
+            <h1>Welcome to The Vibe Garden</h1>
+            <p>Experience Luxury in Nature’s Embrace</p>
+            <div>
+                <a href="contact.html" class="cta-button">Book an Event</a>
+                <a href="contact.html" class="cta-button">Reserve Accommodation</a>
+            </div>
+            <!-- Placeholder for testimonials -->
+            <p style="margin-top: 2rem;">"An unforgettable experience!" - Happy Client</p>
+        </div>
+        <!-- Slider controls -->
+        <div class="slider-controls">
+            <span class="slider-dot active"></span>
+            <span class="slider-dot"></span>
+            <span class="slider-dot"></span>
+            <span class="slider-dot"></span>
+            <span class="slider-dot"></span>
+            <span class="slider-dot"></span>
+            <span class="slider-dot"></span>
+            <span class="slider-dot"></span>
+            <span class="slider-dot"></span>
+            <span class="slider-dot"></span>
+        </div>
+    </section>
+
+    <!-- About Us Section -->
+    <section id="about">
+        <h2>About The Vibe Garden</h2>
+        <p>We are a premier outdoor event space and short-let accommodation provider located in Adenta Commandos, after St. John’s Catholic Church. Our mission is to create unforgettable experiences in a luxurious, natural setting.</p>
+        <!-- Placeholder for team or venue images -->
+        <p style="margin-top: 1rem;">[Insert venue image: lush garden or elegant setup]</p>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services">
+        <h2>Our Services</h2>
+        <div class="services-grid">
+            <div class="service-card">
+                <!-- Placeholder for event image -->
+                <img src="event-placeholder.jpg" alt="Event Setup">
+                <h3>Event Hosting</h3>
+                <p>Host weddings, corporate events, or birthdays in our stunning outdoor venue. We offer customizable packages, outdoor seating, and elegant setups.</p>
+                <a href="contact.html" class="cta-button">Inquire Now</a>
+            </div>
+            <div class="service-card">
+                <!-- Placeholder for accommodation image -->
+                <img src="accommodation-placeholder.jpg" alt="Accommodation">
+                <h3>Short-Let Accommodations</h3>
+                <p>Enjoy luxurious stays in our private suites or cottages, complete with modern amenities. Book via Airbnb for a seamless experience.</p>
+                <a href="contact.html" class="cta-button">Book on Airbnb</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section with Additional Events -->
+    <section id="gallery">
+        <h2>Gallery</h2>
+        <div class="gallery-grid">
+            <div class="gallery-item">
+                <!-- Placeholder for gallery image -->
+                <img src="gallery1-placeholder.jpg" alt="Wedding Event">
+                <p>Evening Wedding Setup</p>
+            </div>
+            <div class="gallery-item">
+                <!-- Placeholder for gallery image -->
+                <img src="gallery2-placeholder.jpg" alt="Corporate Event">
+                <p>Corporate Event</p>
+            </div>
+            <div class="gallery-item">
+                <!-- Placeholder for gallery image -->
+                <img src="gallery3-placeholder.jpg" alt="Accommodation Suite">
+                <p>Luxury Suite</p>
+            </div>
+            <div class="gallery-item">
+                <!-- Placeholder for additional event image -->
+                <img src="gallery4-placeholder.jpg" alt="Birthday Party">
+                <p>Outdoor Birthday Celebration</p>
+            </div>
+            <div class="gallery-item">
+                <!-- Placeholder for additional event image -->
+                <img src="gallery5-placeholder.jpg" alt="Engagement Party">
+                <p>Romantic Engagement Party</p>
+            </div>
+            <div class="gallery-item">
+                <!-- Placeholder for additional event image -->
+                <img src="gallery6-placeholder.jpg" alt="Garden Bridal Shower">
+                <p>Garden Bridal Shower</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section with WhatsApp Link -->
+    <section id="contact">
+        <h2>Contact Us</h2>
+        <div class="contact-info">
+            <p>Phone: 0244843384 | 0244964395</p>
+            <p>Location: Adenta Commandos, after St. John’s Catholic Church</p>
+            <!-- Placeholder for static map image (offline) -->
+            <p>[Insert static map image of Adenta Commandos location]</p>
+            <!-- WhatsApp chat links -->
+            <a href="https://wa.me/233244843384" class="whatsapp-button" target="_blank">Chat with us on WhatsApp (0244843384)</a>
+            <a href="https://wa.me/233244964395" class="whatsapp-button" target="_blank">Chat with us on WhatsApp (0244964395)</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 The Vibe Garden. All rights reserved.</p>
+    </footer>
+
+    <!-- Internal JavaScript for offline functionality -->
+    <script>
+        // Slider functionality
+        const slider = document.querySelector('.slider');
+        const slides = document.querySelectorAll('.slide');
+        const dots = document.querySelectorAll('.slider-dot');
+        let currentSlide = 0;
+
+        function showSlide(index) {
+            // Update slider position
+            slider.style.transform = `translateX(-${index * 100}%)`;
+            // Update active dot
+            dots.forEach(dot => dot.classList.remove('active'));
+            dots[index].classList.add('active');
+        }
+
+        // Auto-slide every 5 seconds
+        function autoSlide() {
+            currentSlide = (currentSlide + 1) % slides.length;
+            showSlide(currentSlide);
+        }
+
+        // Manual slide control via dots
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                currentSlide = index;
+                showSlide(currentSlide);
+            });
+        });
+
+        // Start auto-sliding
+        setInterval(autoSlide, 5000);
+
+        // Initialize first slide
+        showSlide(currentSlide);
+    </script>
+</body>
+</html>

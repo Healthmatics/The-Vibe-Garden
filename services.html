@@ -1,0 +1,339 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Vibe Garden - Services</title>
+    <!-- Internal CSS for offline functionality, enhanced for luxurious feel -->
+    <style>
+        /* Reset default styles for consistency */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body styles: black background, white text for premium aesthetic */
+        body {
+            font-family: 'Georgia', serif;
+            background-color: #000000;
+            color: #ffffff;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Navigation bar */
+        nav {
+            background-color: #000000;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(255, 255, 255, 0.1);
+        }
+
+        nav ul {
+            list-style: none;
+        }
+
+        nav ul li {
+            display: inline-block;
+            margin: 0 1.5rem;
+        }
+
+        nav ul li a {
+            color: #ffffff;
+            text-decoration: none;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: color 0.3s, transform 0.3s;
+        }
+
+        nav ul li a:hover {
+            color: #b22222; /* Red accent on hover */
+            transform: scale(1.1);
+        }
+
+        /* Section styles */
+        section {
+            padding: 5rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        section h2 {
+            font-size: 3rem;
+            color: #b22222;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Services section */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2.5rem;
+            margin-top: 3rem;
+        }
+
+        .service-card {
+            background-color: #1a1a1a;
+            padding: 2rem;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(178, 34, 34, 0.3);
+        }
+
+        .service-card img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s;
+        }
+
+        .service-card:hover img {
+            transform: scale(1.05);
+        }
+
+        .service-card h3 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            font-family: 'Georgia', serif;
+            color: #ffffff;
+        }
+
+        .service-card p {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            color: #d3d3d3;
+        }
+
+        .cta-button {
+            background-color: #b22222;
+            color: #ffffff;
+            padding: 1rem 2rem;
+            text-decoration: none;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 5px;
+            transition: background-color 0.3s, transform 0.3s;
+            display: inline-block;
+        }
+
+        .cta-button:hover {
+            background-color: #ff0000;
+            transform: scale(1.05);
+        }
+
+        /* Service highlights for added flair */
+        .service-highlight {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #b22222, #ff0000);
+            opacity: 0.7;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #1a1a1a;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 3rem;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.9rem;
+            color: #d3d3d3;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            section {
+                padding: 3rem 1rem;
+            }
+
+            section h2 {
+                font-size: 2.2rem;
+            }
+
+            nav ul li {
+                display: block;
+                margin: 0.8rem 0;
+            }
+
+            .service-card {
+                padding: 1.5rem;
+            }
+
+            .service-card img {
+                height: 200px;
+            }
+
+            .cta-button {
+                display: block;
+                margin: 0.5rem auto;
+                width: fit-content;
+            }
+        }
+
+        @media (max-width: 480px) {
+            section h2 {
+                font-size: 1.8rem;
+            }
+
+            .service-card h3 {
+                font-size: 1.5rem;
+            }
+
+            .service-card p {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar with External Page Links -->
+    <nav>
+        <ul>
+            <li><a href="home.html">Home</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="services.html">Services</a></li>
+            <li><a href="gallery.html">Gallery</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+    </nav>
+
+    <!-- Services Section -->
+    <section id="services">
+        <h2>Our Services</h2>
+        <div class="services-grid">
+            <!-- Event Hosting -->
+            <div class="service-card">
+                <div class="service-highlight"></div>
+                <!-- Placeholder for event image -->
+                <img src="event-placeholder.jpg" alt="Luxurious Event Setup">
+                <h3>Event Hosting</h3>
+                <p>Transform your special occasions into unforgettable moments with our stunning outdoor venue. Perfect for weddings, corporate events, birthdays, and more, our customizable packages include elegant outdoor seating, bespoke stage setups, ambient lighting, and state-of-the-art sound systems. Accommodating groups of all sizes, we ensure every detail reflects luxury and sophistication.</p>
+                <a href="contact.html" class="cta-button">Inquire Now</a>
+            </div>
+            <!-- Short-Let Accommodations -->
+            <div class="service-card">
+                <div class="service-highlight"></div>
+                <!-- Placeholder for accommodation image -->
+                <img src="accommodation-placeholder.jpg" alt="Luxury Accommodation Suite">
+                <h3>Short-Let Accommodations</h3>
+                <p>Indulge in luxury with our private suites and cottages, available for short-term stays via Airbnb. Each accommodation features modern amenities such as high-speed Wi-Fi, air conditioning, premium bedding, and stylish interiors. Ideal for event guests or travelers seeking a serene retreat, our spaces offer unmatched comfort and elegance.</p>
+                <a href="contact.html" class="cta-button">Book on Airbnb</a>
+            </div>
+            <!-- Catering Services -->
+            <div class="service-card">
+                <div class="service-highlight"></div>
+                <!-- Placeholder for catering image -->
+                <img src="catering-placeholder.jpg" alt="Gourmet Catering Display">
+                <h3>Catering Services</h3>
+                <p>Elevate your event with our gourmet catering services, offering a range of cuisines from local Ghanaian delicacies to international fine dining. Our expert chefs craft bespoke menus tailored to your preferences, using fresh, high-quality ingredients. Options include plated dinners, buffets, and cocktail-style canapés, all presented with impeccable style.</p>
+                <a href="contact.html" class="cta-button">Explore Menus</a>
+            </div>
+            <!-- Event Planning and Coordination -->
+            <div class="service-card">
+                <div class="service-highlight"></div>
+                <!-- Placeholder for event planning image -->
+                <img src="planning-placeholder.jpg" alt="Event Planning Setup">
+                <h3>Event Planning & Coordination</h3>
+                <p>Let our expert planners bring your vision to life with full-service event coordination. From concept design to day-of management, we handle every detail—floral arrangements, décor, entertainment, and scheduling—ensuring a seamless and stress-free experience. Our team specializes in creating bespoke events that exude luxury and sophistication.</p>
+                <a href="contact.html" class="cta-button">Plan Your Event</a>
+            </div>
+            <!-- Photography and Videography -->
+            <div class="service-card">
+                <div class="service-highlight"></div>
+                <!-- Placeholder for photography image -->
+                <img src="photography-placeholder.jpg" alt="Professional Event Photography">
+                <h3>Photography & Videography</h3>
+                <p>Capture every moment with our professional photography and videography services. Our skilled team uses state-of-the-art equipment to document your event or stay in stunning detail, from candid shots to cinematic highlight reels. We offer customizable packages, including photo albums, digital galleries, and edited videos.</p>
+                <a href="contact.html" class="cta-button">Book a Session</a>
+            </div>
+            <!-- Luxury Transport Services -->
+            <div class="service-card">
+                <div class="service-highlight"></div>
+                <!-- Placeholder for transport image -->
+                <img src="transport-placeholder.jpg" alt="Luxury Transport Vehicle">
+                <h3>Luxury Transport Services</h3>
+                <p>Arrive in style with our chauffeured transport services. We offer a fleet of luxury vehicles, including sedans and SUVs, to shuttle guests to and from The Vibe Garden. Perfect for event attendees or accommodation guests, our service ensures comfort, safety, and a touch of elegance for every journey.</p>
+                <a href="contact.html" class="cta-button">Arrange Transport</a>
+            </div>
+            <!-- Spa and Wellness Retreats -->
+            <div class="service-card">
+                <div class="service-highlight"></div>
+                <!-- Placeholder for spa image -->
+                <img src="spa-placeholder.jpg" alt="Spa and Wellness Retreat">
+                <h3>Spa & Wellness Retreats</h3>
+                <p>Unwind with our exclusive spa and wellness retreats, available for accommodation guests. Enjoy on-site massage therapies, yoga sessions, and wellness workshops in our serene garden setting. Tailored to promote relaxation and rejuvenation, these experiences complement your luxurious stay at The Vibe Garden.</p>
+                <a href="contact.html" class="cta-button">Book a Retreat</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 The Vibe Garden. All rights reserved.</p>
+    </footer>
+</body>
+</html>
