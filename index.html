@@ -362,18 +362,26 @@ nav ul li a:hover::after {
         }
     </style>
 </head>
+        <script>
+    const toggleButton = document.getElementById('menu-toggle');
+    const navMenu = document.getElementById('nav-menu');
+
+    toggleButton.addEventListener('click', () => {
+        navMenu.classList.toggle('mobile-visible');
+    });
+</script>
+
 <body>
     <!-- Navigation Bar with External Page Links -->
     <nav>
-        <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="about.html">About Us</a></li>
-            <li><a href="services.html">Services</a></li>
-            <li><a href="gallery.html">Gallery</a></li>
-            <li><a href="contact.html">Contact</a></li>
-        </ul>
-    </nav>
-
+    <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="gallery.html">Gallery</a></li>
+        <li><a href="contact.html">Contact</a></li>
+    </ul>
+</nav>
     <!-- Homepage: Hero Section with Slider -->
     <section id="home" class="hero">
         <div class="slider">
